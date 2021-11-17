@@ -1,0 +1,12 @@
+> data-types.clj
+> operations.clj
+> functions.clj
+> scoping.clj
+> lists.clj
+> vectors.clj
+> hash-maps.clj 
+> branching.clj
+> for-loops.clj
+> doseq.clj
+> loops.clj
+> higher-order-fn.clj
