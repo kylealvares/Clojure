@@ -1,0 +1,578 @@
+1. Open SQL Shell
+
+Server [localhost]:
+    [Enter]
+Database [postgres]:
+    [Enter]
+Port [5432]:
+    [Enter]
+Username [postgres]:
+    [Enter]
+Password for user postgres:
+    [$password]
+
+**(kyle)
+
+2. Create a Database
+
+// create database with name test
+postgres=# CREATE DATABASE test; 
+
+// list all databases
+postgres=# \l;
+
+postgres=# \q; // quit
+
+3. Connect to Database 
+
+// open sql shell again 
+//*note: \c test - connects to test database as well
+Server [localhost]:
+    [Enter]
+Database [postgres]:
+    test
+Port [5432]:
+    [Enter]
+Username [postgres]:
+    [Enter]
+Password for user postgres:
+    [$password]
+
+4. Deleting a Database (DANGEROUS!) 
+test=# DROP DATABASE test; 
+// re-create test database again
+
+5. Creating a Table
+
+/* creating table template
+test=# CREATE TABLE Table_Name (
+    column_name data_type constraints 
+)
+learn more about data-types:
+https://www.postgresql.org/docs/9.5/datatype.html
+*/
+
+// table without constraints
+test=# CREATE TABLE Person (
+test(# id INT,
+test(# first_name VARCHAR(50),
+test(# last_name VARCHAR(50),
+test(# gender VARCHAR(7),
+test(# date_of_birth DATE );
+
+// describes databases (shows tables)
+test=# \d 
+// describes specific table
+test=# \d Person
+
+// delete old person table 
+DROP TABLE Person;
+
+table with default values 
+test=# CREATE TABLE Person (
+test(# id BIGSERIAL NOT NULL PRIMARY KEY,
+test(# first_name VARCHAR(50) NOT NULL,
+test(# last_name VARCHAR(50) NOT NULL,
+test(# gender VARCHAR(7) DEFAULT 'Male' NOT NULL,
+test(# date_of_birth DATE NOT NULL,
+test(# email VARCHAR(150) DEFAULT 'not provided' );
+
+// table with constraints 
+test=# CREATE TABLE Person (
+test(# id BIGSERIAL PRIMARY KEY,
+test(# first_name VARCHAR(50) NOT NULL,
+test(# last_name VARCHAR(50) NOT NULL,
+test(# gender VARCHAR(7) NOT NULL,
+test(# date_of_birth DATE NOT NULL,
+test(# email VARCHAR(150) );
+
+
+// alternative way to set primary key
+test=# CREATE TABLE Person (
+test(# id BIGSERIAL,
+test(# first_name VARCHAR(50) NOT NULL,
+test(# last_name VARCHAR(50) NOT NULL,
+test(# gender VARCHAR(7) NOT NULL,
+test(# date_of_birth DATE NOT NULL,
+test(# email VARCHAR(150),
+test(# PRIMARY KEY(id) );  // multiple attributes PRIMARY KEY(a, b, ...)
+
+test=# \d // person_id_seq exists because of BIGSERIAL
+
+6. Inserting Records in Table
+
+// specify what is being inserted
+test=# INSERT INTO Person (first_name, last_name, gender, date_of_birth)
+
+// pass in values to be inserted
+test-# VALUES ('Anne', 'Smith', 'FEMALE', date '1988-01-09');
+
+// add another Person
+test=# INSERT INTO Person (first_name, last_name, gender, date_of_birth, email)
+test-# VALUES ('Jake', 'Jones', 'MALE', date '1990-12-31', 'jake@gmail.com');
+
+// add attribute to table 
+test=# ALTER TABLE Person ADD phone CHAR(10);
+
+// delete attribute from table
+test=# ALTER TABLE Person DROP phone;
+
+// generating data: https://mockaroo.com 
+// refer to Person.sql
+
+// drop old table
+test=# DROP TABLE Person;
+
+// use a file input for inserting data 
+test=# \i 'C:/Users/Kyle\ Alvares/Documents/References/PostgreSQL/Person.sql'
+
+7. SELECT  FROM
+
+// view all data from table 
+test=# SELECT * FROM Person; 
+// tip ctrl+c escapes from viewing more data
+
+// view single attribute from table 
+test=# SELECT first_name FROM Person; 
+
+view multiple attributes from table 
+test=# SELECT first_name, last_name FROM Person;
+
+8. ORDER BY
+
+// ascending (nulls come last)
+test=# SELECT * FROM Person ORDER BY country_of_birth;
+
+// ascending explicit
+test=# SELECT * FROM Person ORDER BY country_of_birth ASC;
+
+// descending (note: nulls come first)
+test=# SELECT * FROM Person ORDER BY country_of_birth DESC;
+
+// order by multiple attributes
+test=# SELECT * FROM Person ORDER BY id, country_of_birth;
+
+// dates - ASC: oldest first, DESC - latest first 
+
+9. DISTINCT
+
+// select and order country_of_birth
+test=# SELECT country_of_birth FROM Person ORDER BY country_of_birth;
+
+// find unique countries
+test=# SELECT DISTINCT country_of_birth FROM Person ORDER BY country_of_birth;
+
+10. WHERE  AND  OR
+
+// specify condition
+test=# SELECT * FROM Person WHERE gender='Female';
+
+// specify gender and country_of_birth
+test=# SELECT * FROM Person WHERE gender='Female' AND country_of_birth = 'Poland';
+
+test=# SELECT * FROM Person WHERE gender='Female' AND (country_of_birth = 'Poland' OR country_of_birth = 'China');
+
+
+11. Comparison Operators
+
+// can be applied on other data types
+test=# SELECT 1 = 2; // returns false in ?column?
+test=# SELECT 1 < 2; // returns true in ?column?
+test=# SELECT 1 > 2; // returns false in ?column?
+test=# SELECT 1 <= 2; // returns true in ?column?
+test=# SELECT 1 >= 2; // returns false in ?column?
+test=# SELECT 1 <> 2 // returns true in ?column? (does not equal operator)
+test=# SELECT 'CODE' <> 'code' // returns true in ?column?
+
+12. Limit, Offset & Fetch Clause
+
+// limit the amount of results from the select query
+test=# SELECT * from Person LIMIT 10;
+
+// offsetting the limited results
+test=# SELECT * from Person OFFSET 5 LIMIT 10;
+
+// official SQL uses FETCH 
+test=# SELECT * from Person OFFSET 5 FETCH FIRST 10 ROW ONLY;
+
+13. IN 
+
+test=# SELECT * FROM Person WHERE country_of_birth = 'China' OR
+test=# country_of_birth = 'Brazil' OR country_of_birth = 'France';
+
+// using IN makes it easier
+test=# SELECT * FROM Person WHERE country_of_birth IN ('Brazil', 'China', 'France');
+
+14. BETWEEN 
+
+// select dates from range
+test=# SELECT * FROM Person WHERE date_of_birth BETWEEN DATE '2000-01-01' AND '2020-09-11';
+
+
+15. LIKE  iLike
+
+// find emails ending in '.com' % -is a wildcard
+test=# SELECT * FROM Person WHERE email LIKE '%.com';
+// have @google. in between
+test=# SELECT * FROM Person WHERE email LIKE '%@google.%';
+
+// specifc amount of characters ('_')
+test=# SELECT * FROM Person WHERE email LIKE '%@google.___';
+
+// iLIKE is the same but ignores case sensitivity
+test=# SELECT * FROM Person WHERE country_of_birth LIKE 'p%'; // case sensitive
+test=# SELECT * FROM Person WHERE country_of_birth iLIKE 'p%'; // not case sensitive
+
+
+16. GROUP BY 
+
+// number for people from each country  
+test=# SELECT country_of_birth, COUNT(*) FROM Person GROUP BY country_of_birth;
+// COUNT(*) is an aggregate function that creates column counting every country_of_birth
+
+17. GROUP BY HAVING
+test=# SELECT country_of_birth, FROM Person GROUP BY country_of_birth
+test=# HAVING COUNT(*) > 5 ORDER BY country_of_birth;
+
+18. OTHER FUNCTIONS
+
+// create new table car (Car.sql)
+test=# \i 'C:/Users/Kyle\ Alvares/Documents/References/PostgreSQL/Car.sql'
+
+// MAX() - highest priced car
+test=# SELECT MAX(price) FROM Car;
+
+// MIN() - lowest priced car
+test=# SELECT MIN(price) FROM Car;
+
+// AVG() - avg price of car 
+test=# SELECT AVG(price) FROM car;
+
+// ROUND() - round values, round can take 2 args (value, decimal places)
+test=# SELECT ROUND(AVG(price)) FROM car;
+test=# SELECT ROUND(AVG(price), 2) FROM car;
+
+// minimum price for make and model
+test=# SELECT make, model, MIN(price) FROM Car GROUP BY make, model;
+
+// SUM() adds up values 
+test=# SELECT SUM(price) FROM Car;
+
+// sums of values of all ford cars
+test=# SELECT SUM(price) FROM Car WHERE make='Ford';
+
+// sums of values of each make of cars 
+test=# SELECT make, SUM(price) FROM Car GROUP BY make;
+
+19. Basic Arithmetic Operators
+
+test=# SELECT 10 + 2;
+test=# SELECT 10 - 2;
+test=# SELECT 10 * 2;
+test=# SELECT 10 / 2;
+test=# SELECT 10 % 2;
+test=# SELECT 10 ^ 2;
+test=# SELECT 5!;
+
+// AS - renaming
+test=# SELECT id, model, make, price AS original_price, ROUND(price - (price * 0.1), 2) AS after_discount FROM Car; 
+
+20. COALESCE - finds first non-null value
+
+test=# SELECT COALESCE(1);
+test=# SELECT COALESCE(null, 1);
+test=# SELECT COALESCE(null, null, 1, 10);
+
+// find emails, say 'Email Not Provided' when email is NULL 
+test=# SELECT COALESCE(email, 'email not provided') FROM Person;
+
+21. NULL IF 
+
+// gives error
+test=# SELECT 10 / 0;
+
+// NULLIF(a, b) if a == b return NULL, else return a;
+// returns NULL
+test=# SELECT NULLIF(10, 10);   
+
+// returns a
+test=# SELECT NULLIF(10, 1);  
+
+test=# SELECT 10 / NULLIF(2, 9);
+
+// does not create error and returns 0
+test=# SELECT COALESCE(10 / NULLIF(0, 0), 0);
+
+22. Date & Time
+
+// current date and time
+test=# SELECT NOW();
+
+// current date
+test=# SELECT NOW()::DATE;
+
+// current time 
+test=# SELECT NOW():: TIME;
+
+23. Arithmetic on Dates 
+
+// YEAR, YEARS, MONTH, MONTHS, DAY. DAYS
+
+// one year ago 
+test=# SELECT NOW() - INTERVAL '1 YEAR';
+
+// ten years ago 
+test=# SELECT NOW() - INTERVAL '10 YEARS';
+
+// date in 10 months 
+test=# SELECT (NOW() + INTERVAL '10 MONTHS')::DATE;
+
+23. Extracting Fields
+
+test=# SELECT EXTRACT(CENTURY FROM NOW());
+test=# SELECT EXTRACT(YEAR FROM NOW());
+test=# SELECT EXTRACT(MONTH FROM NOW());
+test=# SELECT EXTRACT(DAY FROM NOW());
+test=# SELECT EXTRACT(DOW FROM NOW()); // day of week
+
+24. Age Function
+
+test=# SELECT first_name, date_of_birth, AGE(NOW(), date_of_birth) AS age FROM Person; 
+
+
+25. Primary Key
+
+// dropping primary key constraints
+// find primary key name using
+test=# \d test
+test=# ALTER Person DROP CONSTRAINT person_pkey;
+
+// add primary key
+test=# ALTER Person TABLE ADD PRIMARY KEY (id);
+
+// delete person from table 
+test=# DELETE FROM Person WHERE id=1;
+
+26. Unique Constraints
+
+// adding a unique constraint to email with custom constraint name
+test=# ALTER TABLE Person ADD CONSTRAINT unique_email UNIQUE(email);
+
+// drop constraint 
+test=# ALTER TABLE Person DROP CONSTRAINT unique_email;
+
+// add unique constraint
+test=# ALTER TABLE Person ADD UNIQUE(email);
+
+27. Check Constraint 
+
+// ensure gender can only be male or female 
+test=# ALTER TABLE Person ADD CONSTRAINT gender_constraint CHECK(gender = 'Male' OR gender = 'Female');
+
+28. Delete Table Records 
+
+// delete everyone
+test=# DELETE FROM Person;
+
+// delete from attribute 
+test=# DELETE FROM Person WHERE id = 2;
+
+29. Update Records
+
+test=# UPDATE Person SET first_name = 'Jesse', email = 'mynewemail@example.com' WHERE id = 398;
+
+30. On Conflict Do Nothing
+
+// insert a conflicitng value without error (table does not get updated, value does not get inserted)
+test=# INSERT INTO Person (first_name, last_name, email, gender, date_of_birth, country_of_birth) 
+test=# VALUES ('Sunny', 'Snasel', 'ssnasel0@hugedomains.com', 'Female', '2020-04-15', 'Indonesia')
+test=# ON CONFLICT (id) DO NOTHING; 
+
+// conflicts only work on attributes with constraints
+
+31. Upsert 
+
+// update tuple on conflict
+test=# INSERT INTO Person (first_name, last_name, email, gender, date_of_birth, country_of_birth) 
+test=# VALUES ('Sunny', 'Snasel', 'ssnasel0@hugedomains.com', 'Female', '2020-04-15', 'Indonesia')
+test=# ON CONFLICT (id) UPDATE SET email = EXCLUDED.email; 
+
+32. Foreign Key 
+
+// refer to Human-Vehicle.sql 
+// in example 1 Human can have 1 vehicle, 1 Vehicle per Human
+// update vehicle for human 
+// Human with id = 1, gets vehicle with id=2
+test=# UPDATE Human SET vehicle_id = 2 WHERE id = 1;
+test=# UPDATE Human SET vehicle_id = 1 WHERE id = 2;
+
+33. Inner Joins
+
+// imagine middle portion of venn diagram
+// join two tables with similar attributes
+
+test=# SELECT * FROM Human JOIN Vehicle ON human.vehicle_id = vehicle.id;
+
+// note \x for expanded view
+
+34. Left Join
+
+// imagine left and middle portion of venn diagram
+
+test=# SELECT * FROM Human LEFT JOIN Vehicle ON human.vehicle_id = vehicle.id;
+
+35. Delete Records with Foreign Keys
+
+// add human and vehicle and link them
+test=# insert into Human (first_name, last_name, email, gender, date_of_birth, country_of_birth) 
+test=# values ('Yancy', 'Local', 'ylocal3@homestead.com', 'Male', '2019-11-25', 'France');
+test=# insert into Vehicle (id, make, model, price) values (4, 'Dodge', 'Dakota', '48737.89');
+test=# UPDATE Human SET vehicle_id = 4 WHERE id = 4;
+
+// deleting vehicle won't work because of FK constraint
+test=# DELETE FROM VEHICLE WHERE id = 4;
+
+// update or delete human, then delete vehicle 
+test=# UPDATE Human SET vehicle_id= NULL WHERE id = 4;
+test=# DELETE FROM Vehicle WHERE id = 4;
+
+36. Exporting to CSV
+
+test=# \copy (SELECT * FROM Human) TO 'C:/Users/Kyle Alvares/Documents/References/PostgreSQL/human.csv' DELIMITER ',' CSV HEADER;
+
+37. Serials
+
+// auto-increment
+
+// info
+test=# \d human
+test=# SELECT * FROM human_id_seq;
+
+// next value - invoking so nextval increases
+test=# SELECT * FROM nextval('human_id_seq'::regclass);
+
+// reset sequence, sequence=person_pkey, value=10
+test=# ALTER SEQUENCE person_id_seq RESTART WITH 10;
+
+38. Extensions
+test=# SELECT * FROM pg_available_extensions;
+
+39. Extensions - uuid-ossp
+
+// universally unique identifiers
+test=# CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+// describe functions
+test=# \df
+
+// generate random uuid 
+test=# SELECT uuid_generate_v4();
+
+// refer to Pilot-Plane.sql
+
+40. Constraints 
+
+// primary keys - single attribute
+test=# CREATE TABLE Beers (
+    name CHAR(20) PRIMARY KEY,
+    manf CHAR(20),
+);
+
+// primary keys - multi attribute 
+test=# CREATE TABLE Beers (
+    name CHAR(20) =UNIQUE,
+    manf CHAR(20),
+    PRIMARY KEY (name, manf)
+);
+
+// foreign keys - single attribute
+CREATE TABLE Sells (
+    bar VARCHAR,
+    beer VARCHAR REFERENCES Beers(name),
+    price REAL 
+);
+
+// foreign key - multi attribute
+FOREIGN KEY (<list of attributes>)
+    REFERENCES <relation> (<attributes>
+);
+
+// set null and cascade
+CREATE TABLE Sells (
+    bar CHAR(20),
+    beer CHAR(20),
+    price REAL,
+    FOREIGN KEY(beer) // creates foreign key
+        REFERENCES Beers(name) 
+        ON DELETE SET NULL // sets null to linked tables on delete
+        ON UPDATE CASCADE // cascades effect to linked tables
+);
+
+// attribute based check 
+CREATE TABLE Sells (
+    bar CHAR(20),
+    beer CHAR(20) CHECK (beer IN (SELECT name FROM Beers)),
+    price REAL CHECK ( price <= 5.00 )
+);
+
+// tuple based check
+CREATE TABLE Sells (
+    bar CHAR(20),
+    beer CHAR(20),
+    price REAL,
+    CHECK (bar = 'Joes Bar' OR price <= 5.00)
+);
+
+// assertions
+CREATE ASSERTION <name> CHECK (
+    <condition>
+);
+
+CREATE ASSERTION FewBar CHECK (
+    (SELECT COUNT(*) FROM Bars) <= (SELECT COUNT(*) FROM Drinkers)
+);
+
+// triggers 
+CREATE TRIGGER BeerTrig
+    BEFORE INSERT ON Sells // event 
+    REFERENCING NEW ROW AS NewTuple
+    FOR EACH ROW
+    WHEN (NewTuple.beer NOT IN // condition
+    (SELECT name FROM Beers))
+    INSERT INTO Beers(name) // action 
+    VALUES(NewTuple.beer);
+
+// CREATE TRIGGER, REPLACE TRIGGER
+// events: AFTER, BEFORE
+    // insert can be DELETE, UPDATE 
+    //    UPDATE ... ON particular attribute 
+// for each row: INSERT, DELETE, UPDATE 
+// [NEW OLD][ROW TABLE] AS <name>
+// condition: boolean
+
+41. Transactions
+
+// ACID transactions are:
+// Atomic : Whole transaction or none is done.
+// Consistent : Database constraints preserved.
+// Isolated : It appears to the user as if only one process executes at a time.
+// Durable : Effects of a process survive a crash.
+
+// COMMIT causes a transaction to complete
+
+// ROLLBACK causes a transaction to end 
+    // failures like division by 0 cause ROLLBACK
+
+// SET TRANSACTION ISOLATION LEVEL X where X =
+    // SERIALIZABLE
+    // REPEATABLE READ
+    // READ COMMITTED
+    // READ UNCOMMITTED
+ 
+ 42. VIEWS 
+ // A view is a relation defined in terms of stored tables (called base tables) and other views.
+    // Virtual = not stored in the database; just a query for constructing the relation.
+    // Materialized = actually constructed and stored.
+
+// CREATE [MATERIALIZED] VIEW <name> AS <query>;
+    // default is VIRTUAL
